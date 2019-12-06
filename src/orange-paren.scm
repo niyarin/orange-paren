@@ -45,7 +45,7 @@
              (eval `(eq? *3 ,input) env))
           (eval '(set! *3 *2) env)
           (eval '(set! *2 *1) env)
-          (eval `(set! *1 ,return-value) env)))
+          (eval `(set! *1 ',return-value) env)))
 
      (define (orange-paren-run . config)
        (call/cc
