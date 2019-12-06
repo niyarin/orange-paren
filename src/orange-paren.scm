@@ -12,7 +12,7 @@
    (begin 
 
      (define %REPL-SETTINGS
-       '((prompt "orange-paren>")
+       '((prompt "orange-paren> ")
          (*3 '())
          (*2 '())
          (*1 '())
