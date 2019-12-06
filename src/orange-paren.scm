@@ -31,15 +31,13 @@
          setting-set))
 
      (define (%ref-prompt env)
-       (let ((prompt (eval 'prompt env)))
-         (cond
-           ((procedure? prompt)
-            (prompt))
-           ((string? prompt)
-            prompt)
-           (else
-             prompt))))
-
+         (eval 
+           `(let ((p prompt ))
+              (cond 
+                ((procedure? p) (p))
+                (else p)))
+           env))
+         
      (define (%save-return-value! input return-value env)
        (unless 
          (or (eval `(eq? *1 ,input) env)
