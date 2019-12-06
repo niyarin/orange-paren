@@ -1,10 +1,13 @@
+(include "./orange-paren-error.scm")
+
 (define-library (color-paren orange-paren)
    (import 
      (scheme base)
      (scheme eval)
      (scheme repl)
      (scheme write)
-     (scheme read))
+     (scheme read)
+     (color-paren orange-paren error))
    (export orange-paren-run)
    (begin 
 
@@ -78,11 +81,8 @@
                                     env))))))
 
                     (cond 
-                      ((error-object? r)
-                        (display 
-                           (error-object-message r))(newline)
-                        (display 
-                           (error-object-irritants r))(newline))
+                      ((error-object? r) 
+                       (orange-paren-error-report r))
                       (else
                        (display r)(newline)
                        (%save-return-value! input r env)))
