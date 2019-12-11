@@ -15,8 +15,7 @@
        '((prompt "orange-paren> ")
          (*3 '())
          (*2 '())
-         (*1 '())
-         ))
+         (*1 '())))
 
      (define (%set-orange-paren-settings! env port setting-set)
        (for-each
@@ -51,7 +50,10 @@
        (call/cc
          (lambda (break)
           (let ((env (interaction-environment)))
-            (%set-orange-paren-settings! env (current-input-port) '(prompt *3 *2 *1))
+            (%set-orange-paren-settings!
+              env
+              (current-input-port)
+              '(prompt *3 *2 *1))
             (let loop ()
                (display (%ref-prompt env))
                (flush-output-port)
@@ -63,24 +65,14 @@
                    (call/cc 
                      (lambda (repl-error-break)
                        (with-exception-handler
-                         (lambda (err-object)
-                           (set! r err-object)
-                           (repl-error-break #f ))
+                         (lambda (handler)
+                             (orange-paren-error-report handler)
+                             (set! r handler)
+                             (repl-error-break #f ))
                          (lambda ()
-                             (set! r
-                                  (eval 
-                                    `(call/cc 
-                                       (lambda (repl-error-break)
-                                         (with-exception-handler
-                                           (lambda (err)
-                                             (repl-error-break err))
-                                           (lambda ()
-                                             ,input))))
-                                    env))))))
-
+                             (set! r (eval input env))))))
                     (cond 
-                      ((error-object? r) 
-                       (orange-paren-error-report r))
+                      ((error-object? r))
                       (else
                        (display r)(newline)
                        (%save-return-value! input r env)))
