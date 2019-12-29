@@ -1,4 +1,5 @@
 (include "./orange-paren-error.scm")
+(include "./orange-paren-colors.scm")
 
 (define-library (color-paren orange-paren)
    (import 
@@ -7,15 +8,20 @@
      (scheme repl)
      (scheme write)
      (scheme read)
+     (color-paren orange-paren colors)
      (color-paren orange-paren error))
    (export orange-paren-run)
    (begin 
 
      (define %REPL-SETTINGS
-       '((prompt "orange-paren> ")
-         (*3 '())
-         (*2 '())
-         (*1 '())))
+       `((prompt 
+           ,(string-append
+               (orange-paren-colors-front-256string 172)
+               "orange-paren> "
+               orange-paren-colors-reset-color))
+         (*3 ())
+         (*2 ())
+         (*1 ())))
 
      (define (%set-orange-paren-settings! env port setting-set)
        (for-each
