@@ -55,7 +55,9 @@
      (define (orange-paren-run . config)
        (call/cc
          (lambda (break)
-          (let ((env (interaction-environment)))
+          (let* ((env (interaction-environment))
+                 (env-id 1)
+                 (env-manager (list (list 0 env))))
             (%set-orange-paren-settings!
               env
               (current-input-port)
@@ -63,9 +65,25 @@
             (let loop ()
                (display (%ref-prompt env))
                (flush-output-port)
-               (let ((input (read)))
+               (let* ((input* (read))
+                      (import-flag
+                        (and (list? input*)
+                             (not (null? input*))
+                             (eq? (car input*) 'import)
+                             (cdr input*)))
+                      (input
+                        (if import-flag (if #f #t) input*)))
                  (when (eof-object? input)
                   (break))
+
+                 (when import-flag
+                   (set! env (apply environment import-flag))
+                   (%set-orange-paren-settings!
+                     env
+                     (current-input-port)
+                     '(prompt *3 *2 *1))
+                   (set! env-manager (cons (list env-id  env) env-manager))
+                   (set! env-id (+ 1 env-id)))
                   
                  (let ((r '()))
                    (call/cc 
