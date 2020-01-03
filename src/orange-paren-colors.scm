@@ -5,9 +5,12 @@
    (begin
       (define (orange-paren-colors-front-256string num)
          (string-append
-           "\x1b[38;5;"
+           (string #\escape)
+           "[38;5;"
            (number->string num)
            "m"))
       (define orange-paren-colors-reset-color
-        "\x1b[0m")
+        (string-append
+           (string #\escape)
+           "[0m"))
      ))
