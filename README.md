@@ -1,4 +1,4 @@
 # Orange-paren
 
-Rich Repl for Scheme.
+Rich and Network Repl for Scheme.
 
