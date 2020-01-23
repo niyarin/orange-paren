@@ -2,7 +2,7 @@
 (include "./orange-paren-colors.scm")
 
 (define-library (color-paren orange-paren)
-   (import 
+   (import
      (scheme base)
      (scheme eval)
      (scheme repl)
@@ -11,14 +11,14 @@
      (color-paren orange-paren colors)
      (color-paren orange-paren error))
    (export orange-paren-run)
-   (begin 
+   (begin
 
      (define %REPL-SETTINGS
-       `((prompt 
+       `((prompt
            ,(string-append
-               (orange-paren-colors-front-256string 172)
+               (orange-paren-colors/front-256string 172)
                "orange-paren> "
-               orange-paren-colors-reset-color))
+               orange-paren-colors/reset-color))
          (*3 ())
          (*2 ())
          (*1 ())))
@@ -36,15 +36,15 @@
          setting-set))
 
      (define (%ref-prompt env)
-         (eval 
+         (eval
            `(let ((p prompt ))
-              (cond 
+              (cond
                 ((procedure? p) (p))
                 (else p)))
            env))
-         
+
      (define (%save-return-value! input return-value env)
-       (unless 
+       (unless
          (or (eval `(eq? *1 ,input) env)
              (eval `(eq? *2 ,input) env)
              (eval `(eq? *3 ,input) env))
@@ -84,18 +84,18 @@
                      '(prompt *3 *2 *1))
                    (set! env-manager (cons (list env-id  env) env-manager))
                    (set! env-id (+ 1 env-id)))
-                  
+
                  (let ((r '()))
-                   (call/cc 
+                   (call/cc
                      (lambda (repl-error-break)
                        (with-exception-handler
                          (lambda (handler)
-                             (orange-paren-error-report handler)
+                             (orange-paren-error/report handler)
                              (set! r handler)
                              (repl-error-break #f ))
                          (lambda ()
                              (set! r (eval input env))))))
-                    (cond 
+                    (cond
                       ((error-object? r))
                       (else
                        (display r)(newline)
@@ -104,7 +104,7 @@
                ))))))
      ))
 
-(import (scheme base) 
+(import (scheme base)
         (color-paren orange-paren))
 
 (orange-paren-run)
