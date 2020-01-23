@@ -1,5 +1,6 @@
 (include "./orange-paren-error.scm")
 (include "./orange-paren-colors.scm")
+(include "./orange-paren-server.scm")
 
 (define-library (color-paren orange-paren)
    (import
@@ -8,9 +9,12 @@
      (scheme repl)
      (scheme write)
      (scheme read)
+     (scheme process-context)
+     (srfi 18);TODO:optional
      (color-paren orange-paren colors)
-     (color-paren orange-paren error))
-   (export orange-paren-run)
+     (color-paren orange-paren error)
+     (color-paren orange-paren server))
+   (export orange-paren/run)
    (begin
 
      (define %REPL-SETTINGS
@@ -52,12 +56,16 @@
           (eval '(set! *2 *1) env)
           (eval `(set! *1 ',return-value) env)))
 
-     (define (orange-paren-run . config)
+     (define (%server-start)
+       (let ((s (color-paren-orange-paren/server "0")))))
+
+     (define (%orange-paren-run  config)
        (call/cc
          (lambda (break)
           (let* ((env (interaction-environment))
                  (env-id 1)
                  (env-manager (list (list 0 env))))
+            ;(%server-start)
             (%set-orange-paren-settings!
               env
               (current-input-port)
@@ -90,7 +98,7 @@
                      (lambda (repl-error-break)
                        (with-exception-handler
                          (lambda (handler)
-                             (orange-paren-error/report handler)
+                             (orange-paren-error-report handler)
                              (set! r handler)
                              (repl-error-break #f ))
                          (lambda ()
@@ -100,11 +108,17 @@
                       (else
                        (display r)(newline)
                        (%save-return-value! input r env)))
-                    (loop))
-               ))))))
-     ))
+                    (loop)))))))
+       (exit))
+
+         (define (orange-paren/run . config)
+            (thread-start!
+               (make-thread
+                   (lambda ()
+                     (%orange-paren-run config))))
+            (%server-start))))
 
 (import (scheme base)
         (color-paren orange-paren))
 
-(orange-paren-run)
+(orange-paren/run)
