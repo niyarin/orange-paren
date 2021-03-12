@@ -1,0 +1,35 @@
+(include "./simple-server/lib-simple-server.scm")
+
+(import (scheme base) (scheme write) (scheme read) (scheme eval) (srfi 18) (srfi 106)
+        (lib-simple-server))
+
+(define (make-nrepl-listener eval-env)
+  (lambda (input-port output-port)
+    (let loop ()
+             (let ((obj (read input-port)))
+               (unless (eof-object? obj)
+                  (let ((res (eval obj eval-env)))
+                    (display res output-port)(newline output-port)
+                    (write-char (integer->char 4) output-port)
+                    (flush-output-port output-port)
+                    (loop)))))))
+
+(define (my-repl env)
+  (let loop ()
+    (display ">")(flush-output-port)
+    (let ((input (read)))
+      (display (eval input env))(newline)
+      (flush-output-port)
+      (loop))))
+
+(define (my-repl-start env)
+  (thread-start! (make-thread (lambda () (my-repl env)))))
+
+(let* ((eval-env (environment '(scheme base) '(scheme read) '(scheme write)))
+       (listener (make-nrepl-listener eval-env))
+       (my-server (make-simple-server listener "0")))
+
+  (display "start nrepl ...")(newline)
+  (display "soclet:")(display (ref-server-socket my-server))(newline)
+  (my-repl-start eval-env)
+  (simple-server-start my-server))
