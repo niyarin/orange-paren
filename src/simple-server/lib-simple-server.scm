@@ -4,7 +4,8 @@
            (srfi 106);socket
            (scheme write)
            (scheme read))
-   (export echo-listener make-simple-server simple-server?  ref-server-socket simple-server-start)
+   (export echo-listener make-simple-server simple-server?  ref-server-socket simple-server-start
+           call-with-simple-server)
    (begin
      (define (echo-listener input-port output-port)
        (let loop ()
@@ -23,11 +24,19 @@
         (%make-simple-server listener server-socket)
         simple-server?
         (listener ref-listener)
-        (server-socket ref-server-socket))
+        (server-socket ref-server-socket set-server-socket!))
 
      (define (make-simple-server listener port)
        (let ((server-socket (make-server-socket port)))
          (%make-simple-server listener server-socket)))
+
+     (define (call-with-simple-server simple-server proc)
+       (dynamic-wind
+         (lambda ())
+         (lambda () (proc simple-server))
+         (lambda ()
+           (socket-close (ref-server-socket simple-server))
+           (set-server-socket! simple-server #f))))
 
      (define (simple-server-start simple-server)
        (unless (simple-server? simple-server) (error "Error simple-server required." simple-server))

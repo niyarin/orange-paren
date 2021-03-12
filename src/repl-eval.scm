@@ -18,12 +18,12 @@
     (define (eval! expression repl-env)
       (call-with-current-continuation
          (lambda (break)
-            (if (%import-expression? expression)
-              (with-exception-handler
-                (lambda (err-object) (break err-object))
-                (lambda ()
-                  (let ((new-env (apply environment (cdr expression))))
-                    (%repl-env-set-scm-env! repl-env new-env)
-                    'imported)))
-              (let ((eval-env (%repl-env-scm-env repl-env)))
-                (eval expression eval-env))))))))
+            (with-exception-handler
+              (lambda (err-object) (break "error"))
+              (lambda ()
+              (if (%import-expression? expression)
+                (let ((new-env (apply environment (cdr expression))))
+                  (%repl-env-set-scm-env! repl-env new-env)
+                  #t)
+                (let ((eval-env (%repl-env-scm-env repl-env)))
+                  (eval expression eval-env))))))))))
