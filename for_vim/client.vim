@@ -17,10 +17,11 @@ function! s:eval_submit(handle) abort
     if start_l == end_l
         let res = getline(start_l)[start_c-1 : end_c-1]
     else
-        let res = getline(start_l)[start_c-1 : -1] . ' '
-                    \ . join(getline(start_l + 1, end_l - 1), ' ')
-                    \ . getline(end_l)[0 : end_c-1]
+        let res = getline(start_l)[start_c-1 : -1] . "\n"
+                    \ . join(getline(start_l + 1, end_l - 1), "\n")
+                    \ . "\n" . getline(end_l)[0 : end_c-1]
     endif
+    echo res
     call ch_sendraw(a:handle, res)
     let output = ch_readraw(a:handle)
     echo output
