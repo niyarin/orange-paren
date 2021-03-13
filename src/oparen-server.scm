@@ -12,11 +12,12 @@
     (let loop ()
        (let ((obj (read input-port)))
          (unless (eof-object? obj)
+                 (display obj)(newline)
             (call/cc
               (lambda (break)
                 (with-exception-handler
                   (lambda (error-object) (break "break"))
-                  (let ((res (orepl-eval/eval! obj repl-env)))
+                  (let ((res (orepl-eval/eval! (cadr obj) repl-env)))
                     (display res output-port)(newline output-port)
                     (write-char (integer->char 4) output-port)
                     (flush-output-port output-port)))))

@@ -21,7 +21,8 @@ function! s:eval_submit(handle) abort
                     \ . join(getline(start_l + 1, end_l - 1), "\n")
                     \ . "\n" . getline(end_l)[0 : end_c-1]
     endif
-    echo res
+    let current_file_name = expand("%")
+    let res = "(" . "eval " . res . " " . current_file_name . ")"
     call ch_sendraw(a:handle, res)
     let output = ch_readraw(a:handle)
     echo output
