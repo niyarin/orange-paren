@@ -18,7 +18,6 @@
                   (lambda (error-object) (break "break"))
                   (lambda ()
                     (let ((res (orepl-eval/eval! (cadr obj) repl-env)))
-                      (write res)(newline)(flush-output-port)
                       (write res output-port)(newline output-port)
                       (write-char (integer->char 4) output-port)
                       (flush-output-port output-port))))))
