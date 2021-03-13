@@ -4,9 +4,6 @@ endif
 
 let g:autoloaded_oparen_client=1
 
-function! Callback(handle, msg) abort
-  echo "RES:" . a:msg
-endfunction
 
 function! s:eval_submit(handle) abort
     if getline('.')[col('.')-1]=~# ')'
@@ -25,6 +22,8 @@ function! s:eval_submit(handle) abort
                     \ . getline(end_l)[0 : end_c-1]
     endif
     call ch_sendraw(a:handle, res)
+    let output = ch_readraw(a:handle)
+    echo output
 endfunction
 
 function! s:get_port_automatically() abort
@@ -41,6 +40,6 @@ endfunction
 
 let port = s:get_port_automatically()
 let addr =  "127.0.0.1:" . port
-let handle = ch_open(addr,{'callback': "Callback"})
+let handle = ch_open(addr)
 nnoremap <Plug>(eval) :<C-u>call <SID>eval_submit(handle)<CR>
 nmap <silent> cpp <Plug>(eval)
