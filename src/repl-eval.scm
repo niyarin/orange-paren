@@ -21,7 +21,7 @@
       (call-with-current-continuation
          (lambda (break)
             (with-exception-handler
-              (lambda (err-object) (flush-output-port)(break "error"))
+              (lambda (err-object) (flush-output-port)(break err-object))
               (lambda ()
                 (if (%import-expression? expression)
                   (let ((new-env (apply environment (cdr expression))))
