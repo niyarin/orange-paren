@@ -11,12 +11,11 @@
 
 (define (run-oparen-command input repl-env output-port)
   (let ((res (orepl-eval/eval! (cadr input) repl-env)))
-    (foe-each (lambda (x) (write x output-port)
-                     (newline output-port))
+    (for-each (lambda (x) (write x output-port)
+                          (newline output-port))
               res)
     (write-char (integer->char 4) output-port)
     (flush-output-port output-port)))
-
 
 (define (make-nrepl-listener repl-env)
   (lambda (input-port output-port)
@@ -27,7 +26,9 @@
               (lambda (break)
                 (with-exception-handler
                   (lambda (error-object)
-                    (display "ERROR")(newline)(break "break"))
+                    (display error-object)(newline)
+                    (display "ERROR")(newline)
+                    (break "break"))
                   (lambda () (run-oparen-command obj repl-env output-port)))))
               (loop))))))
 
