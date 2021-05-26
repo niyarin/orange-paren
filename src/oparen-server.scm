@@ -11,7 +11,9 @@
 
 (define (run-oparen-command input repl-env output-port)
   (let ((res (orepl-eval/eval! (cadr input) repl-env)))
-    (write res output-port)(newline output-port)
+    (foe-each (lambda (x) (write x output-port)
+                     (newline output-port))
+              res)
     (write-char (integer->char 4) output-port)
     (flush-output-port output-port)))
 
@@ -40,7 +42,9 @@
       (if (eof-object? input)
         (begin (%oparen-halt) (exit 0))
         (begin
-          (display (orepl-eval/eval! input repl-env))(newline)
+          (let ((res (orepl-eval/eval! input repl-env)))
+            (for-each (lambda (x) (display x)(newline))
+                      res))
           (flush-output-port)
           (loop))))))
 

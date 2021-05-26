@@ -31,6 +31,7 @@
                         (mutex (%repl-mutex repl-env))
                         (res '()))
                     (mutex-lock! mutex)
-                    (set! res (eval expression eval-env))
+                    (set! res (call-with-values (lambda () (eval expression eval-env))
+                                                list))
                     (mutex-unlock! mutex)
                     res)))))))))
