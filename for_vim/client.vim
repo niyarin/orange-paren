@@ -42,6 +42,7 @@ endfunction
 
 let port = s:get_port_automatically()
 let addr =  "127.0.0.1:" . port
-let handle = ch_open(addr)
+let options = {'mode':'raw'}
+let handle = ch_open(addr,options)
 nnoremap <Plug>(eval) :<C-u>call <SID>eval_submit(handle)<CR>
 nmap <silent> cpp <Plug>(eval)
