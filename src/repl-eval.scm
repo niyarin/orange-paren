@@ -21,7 +21,7 @@
       (call-with-current-continuation
          (lambda (break)
             (with-exception-handler
-              (lambda (err-object) (flush-output-port)(break err-object))
+              (lambda (err-object) (break err-object))
               (lambda ()
                 (if (%import-expression? expression)
                   (let ((new-env (apply environment (cdr expression))))
@@ -30,8 +30,9 @@
                   (let ((eval-env (%repl-env-scm-env repl-env))
                         (mutex (%repl-mutex repl-env))
                         (res '()))
-                    (mutex-lock! mutex)
-                    (set! res (call-with-values (lambda () (eval expression eval-env))
-                                                list))
-                    (mutex-unlock! mutex)
+                    (dynamic-wind
+                      (lambda () (mutex-lock! mutex))
+                      (lambda () (set! res (call-with-values (lambda () (eval expression eval-env))
+                                                list)))
+                      (lambda () (mutex-unlock! mutex)))
                     res)))))))))
