@@ -16,6 +16,12 @@
               (code (cons 1 2)))
             repl-env)
     '((success #t)
-      (res ((1 . 2))))))
+      (res ((1 . 2)))))
+  (test-equal
+    ((omware/eval-middleware (lambda x x))
+            '((op eval)
+              (code (values 1 2)))
+            repl-env)
+    '((success #t)
+      (res (1 2)))))
 (test-end "eval-middleware-test")
-
