@@ -1,6 +1,6 @@
 (include "./simple-server/lib-simple-server.scm")
-(include "./repl-eval.scm")
-(include "./args.scm")
+(include "./orange-paren/repl-eval.scm")
+(include "./orange-paren/args.scm")
 
 (import (scheme base) (scheme write) (scheme read)
         (scheme eval) (scheme process-context) (scheme file)
@@ -11,6 +11,7 @@
 
 (define (run-oparen-command input repl-env output-port)
   (let ((res (orepl-eval/eval! (cadr input) repl-env)))
+    (when (error-object? res) (error "EVAL-ERROR"))
     (for-each (lambda (x) (write x output-port)
                           (newline output-port))
               res)
@@ -27,7 +28,12 @@
                 (with-exception-handler
                   (lambda (error-object)
                     (display error-object)(newline)
-                    (display "ERROR")(newline)
+                    (display (error-object-message error-object))(newline)
+                    (display (error-object-irritants error-object))(newline)
+                    (display obj)(newline)
+                    (display "ERROR" output-port)
+                    (write-char (integer->char 4) output-port)
+                    (flush-output-port output-port)
                     (break "break"))
                   (lambda () (run-oparen-command obj repl-env output-port)))))
               (loop))))))

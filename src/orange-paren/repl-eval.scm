@@ -26,7 +26,7 @@
                 (if (%import-expression? expression)
                   (let ((new-env (apply environment (cdr expression))))
                     (%repl-env-set-scm-env! repl-env new-env)
-                    #t)
+                    '())
                   (let ((eval-env (%repl-env-scm-env repl-env))
                         (mutex (%repl-mutex repl-env))
                         (res '()))
