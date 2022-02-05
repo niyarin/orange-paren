@@ -1,11 +1,11 @@
 (define-library (orange-paren repl-eval)
   (import (scheme base) (scheme eval) (scheme repl) (scheme write) (srfi 18))
-  (export make-default-env eval!)
+  (export make-default-env eval! repl-env-set-scm-env! )
   (begin
     (define-record-type <repl-env>
       (%make-repl-env scm-env mutex)
       %repl-env?
-      (scm-env %repl-env-scm-env %repl-env-set-scm-env!)
+      (scm-env %repl-env-scm-env repl-env-set-scm-env!)
       (mutex %repl-mutex %repl-mutex-set!))
 
     (define (make-default-env)
@@ -25,7 +25,7 @@
               (lambda ()
                 (if (%import-expression? expression)
                   (let ((new-env (apply environment (cdr expression))))
-                    (%repl-env-set-scm-env! repl-env new-env)
+                    (repl-env-set-scm-env! repl-env new-env)
                     '())
                   (let ((eval-env (%repl-env-scm-env repl-env))
                         (mutex (%repl-mutex repl-env))
