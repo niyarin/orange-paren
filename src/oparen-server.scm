@@ -10,7 +10,9 @@
         (lib-simple-server))
 
 (define (run-oparen-command input repl-env output-port)
-  (let ((res (orepl-eval/eval! (cadr input) repl-env)))
+  (let ((res
+          (parameterize ((current-output-port output-port))
+            (orepl-eval/eval! (cadr input) repl-env))))
     (when (error-object? res) (error "EVAL-ERROR"))
     (for-each (lambda (x) (write x output-port)
                           (newline output-port))
@@ -27,11 +29,9 @@
               (lambda (break)
                 (with-exception-handler
                   (lambda (error-object)
-                    (display error-object)(newline)
-                    (display (error-object-message error-object))(newline)
-                    (display (error-object-irritants error-object))(newline)
-                    (display obj)(newline)
-                    (display "ERROR" output-port)
+                    (display (string-append "ERROR:"
+                                            (error-object-message error-object))
+                             output-port)
                     (write-char (integer->char 4) output-port)
                     (flush-output-port output-port)
                     (break "break"))
