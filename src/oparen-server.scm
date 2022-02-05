@@ -1,26 +1,17 @@
 (include "./simple-server/lib-simple-server.scm")
 (include "./orange-paren/repl-eval.scm")
 (include "./orange-paren/args.scm")
+(include "./orange-paren/middleware.scm")
 
 (import (scheme base) (scheme write) (scheme read)
         (scheme eval) (scheme process-context) (scheme file)
         (srfi 18) (srfi 106)
         (prefix (orange-paren repl-eval) orepl-eval/)
         (prefix (orange-paren args) oparen-args/)
+        (prefix (orange-paren middleware) omiddleware/)
         (lib-simple-server))
 
-(define (run-oparen-command input repl-env output-port)
-  (let ((res
-          (parameterize ((current-output-port output-port))
-            (orepl-eval/eval! (cadr input) repl-env))))
-    (when (error-object? res) (error "EVAL-ERROR"))
-    (for-each (lambda (x) (write x output-port)
-                          (newline output-port))
-              res)
-    (write-char (integer->char 4) output-port)
-    (flush-output-port output-port)))
-
-(define (make-nrepl-listener repl-env)
+(define (make-nrepl-listener middleware repl-env)
   (lambda (input-port output-port)
     (let loop ()
        (let ((obj (read input-port)))
@@ -32,10 +23,12 @@
                     (display (string-append "ERROR:"
                                             (error-object-message error-object))
                              output-port)
+                    (display " " output-port)
+                    (display (error-object-irritants error-object) output-port)
                     (write-char (integer->char 4) output-port)
                     (flush-output-port output-port)
                     (break "break"))
-                  (lambda () (run-oparen-command obj repl-env output-port)))))
+                  (lambda () (middleware obj repl-env output-port)))))
               (loop))))))
 
 (define (my-repl repl-env)
@@ -74,7 +67,8 @@
   (%delete-port-file))
 
 (let* ((repl-env (orepl-eval/make-default-env))
-       (listener (make-nrepl-listener repl-env)))
+       (middlewares (omiddleware/default-middleware (lambda (x) x)))
+       (listener (make-nrepl-listener middlewares repl-env)))
   (call-with-simple-server
     (make-simple-server listener (cdr (assq  'port options)))
     (lambda (my-server)

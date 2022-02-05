@@ -11,21 +11,25 @@
         (else (car def))))
 
     (define (%ref-op input)
-      (%assq 'op input #f))
+      ;(%assq 'op input #f)
+      (car input))
 
-    (define (%succress-resp resp)
-      `((success #t)
-        (res ,resp)))
-
-    (define (%run-eval code repl-env)
-      (let ((res (orepl-eval/eval! code repl-env)))
-        (%succress-resp res)))
+    (define (%run-eval code repl-env nport)
+      (let ((res
+              (parameterize ((current-output-port nport))
+                (orepl-eval/eval! code repl-env))))
+        (when (error-object? res) (error "EVAL-ERROR"))
+        (for-each (lambda (x) (write x nport)
+                              (newline nport))
+                  res)
+        (write-char (integer->char 4) nport)
+        (flush-output-port nport)))
 
     (define (eval-middleware handler)
-      (lambda (input repl-env)
+      (lambda (input repl-env nport)
         (if (eq? (%ref-op input) 'eval)
-          (%run-eval (%assq 'code input) repl-env)
-          (handler input repl-env))))
+          (%run-eval (cadr input) repl-env nport)
+          (handler input repl-env nport))))
 
     (define (default-middleware handler)
       (eval-middleware handler))))
