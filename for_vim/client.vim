@@ -22,7 +22,8 @@ function! s:eval_submit(handle) abort
                     \ . "\n" . getline(end_l)[0 : end_c-1]
     endif
     let current_file_name = expand("%")
-    let res = "(" . "eval " . res . " " . current_file_name . ")"
+    let line_num = line(".")
+    let res = "(" . "eval " . res . " " . current_file_name . " " . line_num . ")"
     call ch_sendraw(a:handle, res)
     let output = ch_readraw(a:handle)
     echo output
