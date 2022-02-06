@@ -9,7 +9,14 @@
       (mutex %repl-mutex %repl-mutex-set!))
 
     (define (make-default-env)
-      (let ((eval-env (interaction-environment))
+      (let ((eval-env (environment '(except (scheme base) define)
+                                   '(orange-paren hack-expressions)
+                                   '(scheme write)
+                                   '(scheme read)
+                                   '(scheme load)
+                                   '(scheme process-context)
+                                   '(scheme repl)
+                                   '(scheme time)))
             (mutex (make-mutex)))
         (%make-repl-env eval-env mutex)))
 
